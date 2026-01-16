@@ -19,9 +19,6 @@ class EnhancedStorageManager {
     
     /**
      * Save data untuk entity tertentu
-     * @param {string} entity - Entity name (users, tasks, settings)
-     * @param {any} data - Data to save
-     * @returns {boolean} - Success status
      */
     save(entity, data) {
         if (!this.isAvailable) {
@@ -39,8 +36,10 @@ class EnhancedStorageManager {
             
             localStorage.setItem(key, JSON.stringify(dataToSave));
             
-            // Update metadata
-            this._updateMetadata(entity, dataToSave.timestamp);
+            // ⚠️ PENTING: metadata TIDAK BOLEH update metadata lagi
+            if (entity !== '_metadata') {
+                this._updateMetadata(entity, dataToSave.timestamp);
+            }
             
             return true;
         } catch (error) {
@@ -51,9 +50,6 @@ class EnhancedStorageManager {
     
     /**
      * Load data untuk entity tertentu
-     * @param {string} entity - Entity name
-     * @param {any} defaultValue - Default value jika tidak ada data
-     * @returns {any} - Loaded data atau default value
      */
     load(entity, defaultValue = null) {
         if (!this.isAvailable) {
@@ -70,10 +66,10 @@ class EnhancedStorageManager {
             
             const parsedData = JSON.parse(storedData);
             
-            // Check version compatibility
             if (parsedData.version && parsedData.version !== this.version) {
-                console.warn(`Version mismatch for ${entity}: stored=${parsedData.version}, current=${this.version}`);
-                // Bisa implement migration logic di sini
+                console.warn(
+                    `Version mismatch for ${entity}: stored=${parsedData.version}, current=${this.version}`
+                );
             }
             
             return parsedData.data;
@@ -85,8 +81,6 @@ class EnhancedStorageManager {
     
     /**
      * Remove data untuk entity tertentu
-     * @param {string} entity - Entity name
-     * @returns {boolean} - Success status
      */
     remove(entity) {
         if (!this.isAvailable) {
@@ -97,8 +91,9 @@ class EnhancedStorageManager {
             const key = this._getKey(entity);
             localStorage.removeItem(key);
             
-            // Update metadata
-            this._removeFromMetadata(entity);
+            if (entity !== '_metadata') {
+                this._removeFromMetadata(entity);
+            }
             
             return true;
         } catch (error) {
@@ -109,7 +104,6 @@ class EnhancedStorageManager {
     
     /**
      * Clear semua data aplikasi
-     * @returns {boolean} - Success status
      */
     clear() {
         if (!this.isAvailable) {
@@ -119,7 +113,6 @@ class EnhancedStorageManager {
         try {
             const keysToRemove = [];
             
-            // Find all keys yang belong ke app ini
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
                 if (key && key.startsWith(this.appName)) {
@@ -127,9 +120,7 @@ class EnhancedStorageManager {
                 }
             }
             
-            // Remove all keys
             keysToRemove.forEach(key => localStorage.removeItem(key));
-            
             return true;
         } catch (error) {
             console.error('Failed to clear app data:', error);
@@ -139,12 +130,9 @@ class EnhancedStorageManager {
     
     /**
      * Export semua data aplikasi
-     * @returns {Object|null} - Exported data atau null jika gagal
      */
     exportData() {
-        if (!this.isAvailable) {
-            return null;
-        }
+        if (!this.isAvailable) return null;
         
         try {
             const exportData = {
@@ -154,12 +142,10 @@ class EnhancedStorageManager {
                 data: {}
             };
             
-            // Get all app keys
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
                 if (key && key.startsWith(this.appName)) {
-                    const value = localStorage.getItem(key);
-                    exportData.data[key] = JSON.parse(value);
+                    exportData.data[key] = JSON.parse(localStorage.getItem(key));
                 }
             }
             
@@ -172,26 +158,15 @@ class EnhancedStorageManager {
     
     /**
      * Import data ke aplikasi
-     * @param {Object} importData - Data yang akan diimport
-     * @returns {boolean} - Success status
      */
     importData(importData) {
-        if (!this.isAvailable) {
-            return false;
-        }
+        if (!this.isAvailable) return false;
         
         try {
-            // Validasi format import data
             if (!importData.appName || !importData.data) {
                 throw new Error('Invalid import data format');
             }
             
-            // Warning jika app name berbeda
-            if (importData.appName !== this.appName) {
-                console.warn(`Importing data from different app: ${importData.appName}`);
-            }
-            
-            // Import each key
             Object.keys(importData.data).forEach(key => {
                 localStorage.setItem(key, JSON.stringify(importData.data[key]));
             });
@@ -204,13 +179,10 @@ class EnhancedStorageManager {
     }
     
     /**
-     * Get storage usage info
-     * @returns {Object} - Storage usage information
+     * Storage usage info
      */
     getStorageInfo() {
-        if (!this.isAvailable) {
-            return { available: false };
-        }
+        if (!this.isAvailable) return { available: false };
         
         try {
             let totalSize = 0;
@@ -220,12 +192,11 @@ class EnhancedStorageManager {
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
                 const value = localStorage.getItem(key);
-                const itemSize = key.length + value.length;
+                const size = key.length + value.length;
                 
-                totalSize += itemSize;
-                
+                totalSize += size;
                 if (key.startsWith(this.appName)) {
-                    appSize += itemSize;
+                    appSize += size;
                     appKeys++;
                 }
             }
@@ -235,18 +206,15 @@ class EnhancedStorageManager {
                 totalSize,
                 appSize,
                 appKeys,
-                totalKeys: localStorage.length,
-                usagePercentage: totalSize > 0 ? (appSize / totalSize * 100).toFixed(2) : 0
+                totalKeys: localStorage.length
             };
         } catch (error) {
-            console.error('Failed to get storage info:', error);
             return { available: false, error: error.message };
         }
     }
     
     /**
-     * Get app metadata
-     * @returns {Object} - App metadata
+     * Metadata
      */
     getMetadata() {
         return this.load('_metadata', {
@@ -256,88 +224,90 @@ class EnhancedStorageManager {
         });
     }
     
-    /**
-     * Check if entity exists
-     * @param {string} entity - Entity name
-     * @returns {boolean} - Existence status
-     */
     exists(entity) {
-        if (!this.isAvailable) {
-            return false;
-        }
-        
-        const key = this._getKey(entity);
-        return localStorage.getItem(key) !== null;
+        if (!this.isAvailable) return false;
+        return localStorage.getItem(this._getKey(entity)) !== null;
     }
     
-    /**
-     * Get all entity names
-     * @returns {string[]} - Array of entity names
-     */
     getEntities() {
-        if (!this.isAvailable) {
-            return [];
-        }
+        if (!this.isAvailable) return [];
         
         const entities = [];
         const prefix = this.appName + '_';
         
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
-            if (key && key.startsWith(prefix)) {
-                const entity = key.substring(prefix.length);
-                if (entity !== '_metadata') {
-                    entities.push(entity);
-                }
+            if (key && key.startsWith(prefix) && !key.endsWith('_metadata')) {
+                entities.push(key.replace(prefix, ''));
             }
         }
-        
         return entities;
     }
     
-    // Private methods
+    // ================= PRIVATE METHODS =================
+    
     _getKey(entity) {
         return `${this.appName}_${entity}`;
     }
     
     _checkStorageAvailability() {
         try {
-            const testKey = '__storage_test__';
-            localStorage.setItem(testKey, 'test');
-            localStorage.removeItem(testKey);
+            localStorage.setItem('__test__', '1');
+            localStorage.removeItem('__test__');
             return true;
-        } catch (error) {
+        } catch {
             return false;
         }
     }
     
     _initializeApp() {
-        if (!this.exists('_metadata')) {
-            this.save('_metadata', {
-                version: this.version,
-                createdAt: new Date().toISOString(),
-                entities: {}
-            });
+        const metadataKey = this._getKey('_metadata');
+        if (!localStorage.getItem(metadataKey)) {
+            localStorage.setItem(metadataKey, JSON.stringify({
+                data: {
+                    version: this.version,
+                    createdAt: new Date().toISOString(),
+                    entities: {}
+                },
+                timestamp: new Date().toISOString(),
+                version: this.version
+            }));
         }
     }
     
     _updateMetadata(entity, timestamp) {
-        const metadata = this.getMetadata();
+        const metadataKey = this._getKey('_metadata');
+        const stored = localStorage.getItem(metadataKey);
+        if (!stored) return;
+        
+        const metadataWrapper = JSON.parse(stored);
+        const metadata = metadataWrapper.data;
+        
         metadata.entities[entity] = {
             lastUpdated: timestamp,
             version: this.version
         };
-        this.save('_metadata', metadata);
+        
+        localStorage.setItem(metadataKey, JSON.stringify({
+            data: metadata,
+            timestamp: new Date().toISOString(),
+            version: this.version
+        }));
     }
     
     _removeFromMetadata(entity) {
-        const metadata = this.getMetadata();
-        delete metadata.entities[entity];
-        this.save('_metadata', metadata);
+        const metadataKey = this._getKey('_metadata');
+        const stored = localStorage.getItem(metadataKey);
+        if (!stored) return;
+        
+        const metadataWrapper = JSON.parse(stored);
+        delete metadataWrapper.data.entities[entity];
+        
+        localStorage.setItem(metadataKey, JSON.stringify(metadataWrapper));
     }
 }
 
-// Export untuk digunakan di file lain
+// Export
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = EnhancedStorageManager;
 } else {
