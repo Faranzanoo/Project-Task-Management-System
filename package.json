@@ -28,7 +28,7 @@
     "prettier": "^2.8.0"
   },
   "dependencies": {
-    "express": "^4.22.1"
+    "express": "^4.22.3"
   },
   "engines": {
     "node": ">=14.0.0"
