@@ -1,69 +1,112 @@
-# Task Management System - Starter Project
+# ✅ Task Management System
 
-Welcome to the Software Engineering Shortcourse! This is your starter project that you'll build upon over the next 5 days.
+Aplikasi manajemen tugas berbasis web yang berjalan sepenuhnya di browser. Dibangun dengan **vanilla JavaScript (ES6 classes)** memakai arsitektur **MVC + Repository**, menyimpan data di `localStorage`, dan diuji dengan **Jest**.
 
-## Quick Start
+<!--
+Setelah GitHub Pages dipastikan aktif, buka komentar ini dan sesuaikan tautannya:
+**Demo:** https://faranzanoo.github.io/Project-Task-Management-System/
+-->
 
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+---
 
-2. **Start the development server:**
-   ```bash
-   npm start
-   ```
+## ✨ Fitur
 
-3. **Open your browser:**
-   Navigate to `http://localhost:3000`
+- **Akun pengguna** — registrasi dan login dengan username (simulasi untuk pembelajaran, tanpa password; lihat [Keterbatasan](#-keterbatasan))
+- **Manajemen task** — buat, tandai selesai / belum selesai, dan hapus task
+- **Kategori** — Personal, Work, Study, Health, Finance, Other
+- **Prioritas** — Low, Medium, High, Urgent
+- **Due date, estimasi jam, dan tags** untuk setiap task
+- **Assign task** ke pengguna lain
+- **Pencarian dan pengurutan** (terbaru, terlama, judul A–Z / Z–A, prioritas, due date)
+- **Filter status** — Pending, In Progress, Completed, Blocked
+- **Dashboard** — statistik task, daftar **overdue**, dan task yang **jatuh tempo dalam 3 hari**
+- **Export data** aplikasi
+- **Penyimpanan lokal** — data tetap ada setelah halaman di-refresh
 
-That's it! You should see a welcome page with the course outline.
+---
 
-## Project Structure
+## 🏗️ Arsitektur
 
 ```
-starter-project/
-├── package.json          # Project configuration and dependencies
-├── server.js            # Basic development server
-├── README.md            # This file
-├── public/              # Static files served by the web server
-│   ├── index.html       # Main HTML page
-│   └── styles.css       # Basic styling
-├── src/                 # Source code (you'll add files here)
-│   ├── app.js          # Main application entry point (currently empty)
-│   ├── models/         # Data models (Day 1+)
-│   ├── services/       # Business logic (Day 1+)
-│   └── utils/          # Utility functions (Day 1+)
-└── tests/              # Test files (Day 3+)
+.
+├── index.html            # Halaman utama
+├── app.js                # Titik masuk: menyusun storage, repository, controller, dan view
+├── styles.css
+├── server.js             # Server statis untuk pengembangan lokal
+├── src/
+│   ├── models/           # User, Task, EnhancedTask (validasi dan aturan bisnis)
+│   ├── repositories/     # UserRepository, TaskRepository (akses data, query, statistik)
+│   ├── controllers/      # UserController, TaskController (alur kerja aplikasi)
+│   ├── views/            # TaskView (render DOM, di-escape dari input pengguna)
+│   ├── services/         # TaskService
+│   └── utils/            # StorageManager, EnhancedStorageManager (localStorage + metadata + export/import)
+├── tests/                # Tes Jest (models, repositories, controllers, services, utils)
+└── requirements.md       # User story dan acceptance criteria
 ```
 
-## What You'll Build
+Alurnya: **View** menangkap aksi pengguna → **Controller** memvalidasi dan mengoordinasi → **Repository** membaca/menulis lewat **StorageManager** → **Model** menjaga aturan data.
 
-Over the 5-day course, you'll transform this simple starter into a full-featured task management application:
+---
 
-- **Day 1:** Basic task management with MVC structure
-- **Day 2:** Enhanced design patterns and requirements analysis
-- **Day 3:** Comprehensive testing with Jest
-- **Day 4:** Git workflow and collaboration features
-- **Day 5:** Production deployment and best practices
+## 🛠️ Teknologi
 
-## Available Scripts
+| Bagian | Yang dipakai |
+|---|---|
+| Frontend | HTML, CSS, JavaScript (ES6), tanpa framework |
+| Penyimpanan | `localStorage` |
+| Server dev | Node.js + Express (hanya melayani file statis) |
+| Pengujian | Jest + jsdom |
+| Kualitas kode | ESLint, Prettier |
 
-- `npm start` - Start the development server
-- `npm test` - Run tests (Day 3+)
-- `npm run lint` - Check code quality (Day 3+)
-- `npm run format` - Format code with Prettier (Day 3+)
+---
 
-## Getting Help
+## 🚀 Menjalankan
 
-- Check the course materials for each day
-- Ask your instructor if you get stuck
-- Review the troubleshooting guides in the course documentation
+Prasyarat: **Node.js 18+**.
 
-## Next Steps
+```bash
+npm install
+npm start
+```
 
-1. Make sure `npm start` works and you can see the welcome page
-2. Familiarize yourself with the project structure
-3. Wait for Day 1 materials to begin implementation
+Buka `http://localhost:3000`.
 
-Happy coding! 🚀
+Perintah lain:
+
+```bash
+npm test          # jalankan tes + laporan cakupan
+npm run lint      # ESLint
+npm run format    # Prettier
+```
+
+---
+
+## 🧪 Pengujian
+
+Ada **102 tes** di 8 suite yang mencakup model, repository, controller, service, dan storage. Cakupan saat ini sekitar **60%**. Bagian yang belum diuji adalah `TaskView` (render DOM) dan `UserController`, dan itu menjadi langkah berikutnya.
+
+---
+
+## ⚠️ Keterbatasan
+
+- **Login hanya memakai username, tanpa password.** Ini simulasi autentikasi untuk pembelajaran, bukan sistem keamanan.
+- **Data tersimpan di `localStorage` browser**, jadi tidak tersinkron antar perangkat dan bisa dibaca siapa pun yang memakai browser yang sama.
+- **Fitur edit task belum diimplementasikan** di antarmuka (tombol edit masih berupa stub).
+
+---
+
+## 🗺️ Pengembangan Selanjutnya
+
+- [ ] Implementasi edit task di antarmuka
+- [ ] Tes untuk `TaskView` dan `UserController`
+- [ ] Backend dan autentikasi sungguhan (password ter-hash, database)
+
+---
+
+## 📚 Asal Project
+
+Project ini dikembangkan mengikuti kurikulum kursus **Software Engineering Shortcourse**. Struktur awal (starter project), user story, dan konfigurasi tooling berasal dari materi kursus.
+
+---
+
+© 2026 Titan Faranzano. Source code ditampilkan untuk dilihat dan dipelajari; penggunaan ulang tidak diizinkan tanpa izin tertulis.

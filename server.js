@@ -1,8 +1,10 @@
 /**
- * Basic Development Server for Task Management Starter Project
- * 
- * This is a minimal static file server that serves HTML, CSS, and JavaScript files.
- * Students will build upon this foundation throughout the 5-day course.
+ * Server pengembangan lokal (static file server).
+ *
+ * Situs ini murni statis dan di-deploy ke GitHub Pages, jadi server ini hanya
+ * untuk pengembangan lokal. Hanya file yang dibutuhkan aplikasi yang dilayani
+ * (bukan seluruh folder project), supaya package.json, node_modules, dan tes
+ * tidak ikut terbuka.
  */
 
 const express = require('express');
@@ -11,29 +13,30 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Serve static files from public directory
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Serve source files for development
+// Folder source aplikasi (model, controller, view, dst.)
 app.use('/src', express.static(path.join(__dirname, 'src')));
 
-// Handle all routes - serve index.html
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// File di akar yang dibutuhkan index.html
+app.get(['/app.js', '/styles.css'], (req, res) => {
+    res.sendFile(path.join(__dirname, req.path));
 });
 
-// Start the server
-app.listen(PORT, () => {
-    console.log(`🚀 Development server running at http://localhost:${PORT}`);
-    console.log(`📁 Serving files from: ${path.join(__dirname, 'public')}`);
-    console.log(`\n📖 Ready for development!`);
-    console.log(`\n🛑 Press Ctrl+C to stop the server`);
+// Semua route lain menampilkan halaman utama
+app.use((req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Graceful shutdown
-process.on('SIGINT', () => {
-    console.log('\n👋 Shutting down server...');
-    process.exit(0);
-});
+// Jalankan server hanya jika file ini dieksekusi langsung (bukan saat di-require)
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server pengembangan berjalan di http://localhost:${PORT}`);
+        console.log('Tekan Ctrl+C untuk menghentikan server');
+    });
+
+    process.on('SIGINT', () => {
+        console.log('\nServer dihentikan.');
+        process.exit(0);
+    });
+}
 
 module.exports = app;

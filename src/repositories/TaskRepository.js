@@ -8,8 +8,8 @@
  * - Statistics dan reporting
  */
 if (typeof require !== 'undefined' && typeof module !== 'undefined'){
-    if (typeof EnchancedTask === 'undefined') {
-        EnhancedTask = require('../models/EnhancedTask');
+    if (typeof EnhancedTask === 'undefined') {
+        globalThis.EnhancedTask = require('../models/EnhancedTask');
     }
 }
 class TaskRepository {
@@ -289,27 +289,28 @@ class TaskRepository {
             let valueA, valueB;
             
             switch (sortBy) {
-                case 'title':
-                    valueA = a.title.toLowerCase();
-                    valueB = b.title.toLowerCase();
-                    break;
-                case 'priority':
-                    const priorityOrder = { 'low': 1, 'medium': 2, 'high': 3, 'urgent': 4 };
-                    valueA = priorityOrder[a.priority];
-                    valueB = priorityOrder[b.priority];
-                    break;
-                case 'dueDate':
-                    valueA = a.dueDate || new Date('9999-12-31');
-                    valueB = b.dueDate || new Date('9999-12-31');
-                    break;
-                case 'createdAt':
-                case 'updatedAt':
-                    valueA = a[sortBy];
-                    valueB = b[sortBy];
-                    break;
-                default:
-                    valueA = a.createdAt;
-                    valueB = b.createdAt;
+            case 'title':
+                valueA = a.title.toLowerCase();
+                valueB = b.title.toLowerCase();
+                break;
+            case 'priority': {
+                const priorityOrder = { 'low': 1, 'medium': 2, 'high': 3, 'urgent': 4 };
+                valueA = priorityOrder[a.priority];
+                valueB = priorityOrder[b.priority];
+                break;
+            }
+            case 'dueDate':
+                valueA = a.dueDate || new Date('9999-12-31');
+                valueB = b.dueDate || new Date('9999-12-31');
+                break;
+            case 'createdAt':
+            case 'updatedAt':
+                valueA = a[sortBy];
+                valueB = b[sortBy];
+                break;
+            default:
+                valueA = a.createdAt;
+                valueB = b.createdAt;
             }
             
             if (order === 'asc') {

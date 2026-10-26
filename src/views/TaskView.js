@@ -359,7 +359,7 @@ class TaskView {
     /**
      * Handle task edit
      */
-    _handleTaskEdit(taskId) {
+    _handleTaskEdit(/* taskId */) {
         // Implementasi edit task
         // Untuk sekarang, kita tampilkan alert saja
         alert('Edit task feature akan diimplementasikan nanti');

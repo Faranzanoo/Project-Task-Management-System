@@ -8,7 +8,7 @@
  */
 if (typeof require !== 'undefined' && typeof module !== 'undefined'){
     if (typeof User === 'undefined') {
-        User = require('../models/User');
+        globalThis.User = require('../models/User');
     }
 }
 class UserRepository {
