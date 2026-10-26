@@ -2,8 +2,9 @@
 
 Aplikasi manajemen tugas berbasis web yang berjalan sepenuhnya di browser. Dibangun dengan **vanilla JavaScript (ES6 classes)** memakai arsitektur **MVC + Repository**, menyimpan data di `localStorage`, dan diuji dengan **Jest**.
 
-Setelah GitHub Pages dipastikan aktif, buka komentar ini dan sesuaikan tautannya:
+
 **Demo:** https://faranzanoo.github.io/Project-Task-Management-System/
+
 
 ---
 
